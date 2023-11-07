@@ -1,0 +1,11 @@
+Package: nirsex
+Title: Tools for Analyzing NIRS Exercise Physiology Data
+Version: 0.0.0.9000
+Authors@R: 
+    person("Sara", "Biddle", , "saragracebiddle@gmail.com", role = c("aut", "cre"),
+           )
+Description: Create and describe use of tools to analyze NIRS data from exercise physiology testing.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
