@@ -7,10 +7,10 @@ test_that("Throws error if file does not exist", {
 
 })
 
-test_that("Throws error if file does not have appropriate metadata", {
+test_that("read_nirs works with txt files", {
 
-  expect_error(
-    read_nirs("")
+  expect_no_condition(
+    read_nirs(nirsex_example("nirs_example.txt"))
   )
 
 })

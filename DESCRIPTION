@@ -8,7 +8,7 @@ Description: Create and describe use of tools to analyze NIRS data from exercise
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Suggests: 
     knitr,
     rmarkdown,
@@ -18,5 +18,8 @@ Imports:
     dplyr,
     fs,
     glue,
+    methods,
     rlang
 VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10)

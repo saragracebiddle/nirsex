@@ -4,47 +4,63 @@
 #' Reads a file of NIRS data and creates a data frame from it.
 #'
 #' @param file file to read
+#' @param ... other parameters to pass to class methods
 #'
-#' @return data.frame
+#' @return rawdata
 #' @export
 read_nirs <- function(file, ...){
 
+  UseMethod("read_nirs")
+
+}
+
+#' @export
+read_nirs.character <- function(file, ...){
   # throw file does not exist error if does not exist
   if(!file.exists(file)){
-    rlang::abort("error_file_dne",
-                 message = msg)
+    error_file_dne(file)
   }
 
   class(file) <- extract_ext(file)
 
-  UseMethod("read_nirs")
+  callGeneric()
 }
 
-#' Read a .txt file of NIRS data
-#'
-#' @param file filepath
-#' @param sep column delimiter
-#'
-#' @return data frame
-read_nirs.txt <- function(file, sep = "\t", colnames = "short"){
+#' @export
+read_nirs.txt <- function(file, ...,  delim = NULL){
+
+  if(is.null(delim)){
+    delim = '\t'
+  }
+
+  if(is.null(colnames)){
+    colnames = 'short'
+  }
 
   class(file) <- "character"
 
-  s = tryCatch(
-    scan(file, n=1000, sep=sep, na.strings="", what=chatacter(), quiet=T, skipNul=T),
-    error = function(e){
-      rlang::abort("error_in_file_scan",
-                   message= "Error when scanning file.")
-    }
-  )
+  s = tryCatch(scan(file,
+                   n=1000,
+                   sep=delim,
+                   na.strings="",
+                   what=character(),
+                   quiet=T,
+                   skipNul=T),
+              error = function(cnd){
+                rlang::abort("error_in_file_scan",
+                             message= "Error when scanning file.")
+              })
 
   numSamples <- get_metadata(s, type = "num_samples")
 
   hz <- get_metadata(s, type = "hz")
-
   ot <- get_metadata(s, type = "optode_template")
-
-  legend <- get_metadata(s, type = "legend")
+  legendinfo <- get_metadata(s, type = "legend")
+  export_type = legendinfo[["export_type"]]
+  legend = legendinfo[["cols"]]
+  meas_date <- get_metadata(s, type = "meas_date")
+  serialnum <- get_metadata(s, type = "serial")
+  wavelengths <- get_metadata(s, type = "wavelengths")
 
   srows = scan(
     file,
@@ -59,10 +75,9 @@ read_nirs.txt <- function(file, sep = "\t", colnames = "short"){
   row1 = stringr::str_which(
     srows,
     stringr::str_c(
-      legend[!is.na(V1)][[1]], collapse = "\t"
+      legend[!is.na(legend[1]),1], collapse = "\t"
     )
   ) +1
-
 
   problems = suppressWarnings(readr::parse_double(
     scan(
@@ -80,38 +95,73 @@ read_nirs.txt <- function(file, sep = "\t", colnames = "short"){
     matrix(
       problems[!is.na(problems)],
       ncol = length(
-        legend[!is.na(V1)][[1]][!stringr::str_detect(
-          legend[!is.na(V1)][[2]],
+        legend[!is.na(legend[1]),1][!stringr::str_detect(
+          legend[!is.na(legend[1]),2],
           "Event"
         )]
       ),
       byrow = T)
   )
 
-  collabels <- legend[!is.na(V1)][[2]][!stringr::str_detect(
-    legend[!is.na(V1)][[2]], "Event"
+  collabels <- legend[!is.na(legend[1]),2][!stringr::str_detect(
+    legend[!is.na(legend[1]),2], "Event"
   )]
 
-  out = data.table::data.table(
-    matrix(
-      problems[!is.na(problems)],
-      ncol = length(legend[!is.na(V1)][[2]][!stringr::str_detect(
-        legend[!is.na(V1)][[2]],
-        "Event")]
-      ),
-      byrow = T)
-  )
 
-  if(colnames == "short"){
-    colnames(out) <- sapply(collabels, get_labels)
+
+  # \\TODO
+  # instead of doing this explicitly, take from the column names
+  # and other metadata
+  if(export_type == "haemoglobin"){
+    if(ot == "PortaMon TSI"){
+      chs <- data.frame(
+        ch_name = c("S1_D1_759","S1_D1_854","S2_D1_759","S2_D1_854","S3_D1_761","S3_D1_856", "TSI"),
+        ch_type = c(rep(c("hbo", "hbr"),3), "tsi"),
+        source_num = c(rep(c(1L,2L,3L), each = 2), NA_integer_),
+        det_num = c(rep(1L, times = 6), NA_integer_),
+        wavelength = c(rep(c(759L, 854L), each = 2), 761L, 856L, NA_integer_)
+      )
+    } else{
+      chs <- data.frame(
+        ch_name = c("S1_D1_759","S1_D1_854","S2_D1_759","S2_D1_854","S3_D1_761","S3_D1_856", "TSI", "TSIFF"),
+        ch_type = c(rep(c("hbo", "hbr"),3), "tsi", "misc"),
+        source_num = c(rep(c(1L,2L,3L), each = 2), NA_integer_, NA_integer_),
+        det_num = c(rep(1L, times = 6), NA_integer_, NA_integer_),
+        wavelength = c(rep(c(759L, 854L), each = 2), 761L, 856L, NA_integer_, NA_integer_)
+      )
+    }
   } else {
-    colnames(out) <- collabels
+    chs <- data.frame(
+      ch_name = c("S1_D1_759","S1_D1_854","S2_D1_759","S2_D1_854","S3_D1_761","S3_D1_856"),
+      ch_type = rep("optical_density", times = 6),
+      source_num = c(rep(c(1L,2L,3L), each = 2)),
+      det_num = c(rep(1L, times = 6)),
+      wavelength = c(rep(c(759L, 854L), each = 2), 761L, 856L)
+    )
   }
+
+  sampcol <- "samp_num"
+
+
+  colnames(out) <- c(sampcol, chs[["ch_name"]])
+
 
   if(ot == "PortaMon TSI"){
-    out |>
-      dplyr::select(
-        !dplyr::matches("T|tx3") & !dplyr::matches("TSI Fit Factor|TSIFF")
-      )
+    bads = c("S3_D1 761", "S3_D1 856")
   }
+
+  rawdata <- rawdata(
+    data = out,
+    chs = chs,
+    device_info = list("type" = "NIRS",
+                       "model" = "PortaMon",
+                       "serial" = serialnum),
+    meas_date = meas_date,
+    sfreq = hz,
+    bads = bads
+  )
+
+  rawdata
 }
+
+

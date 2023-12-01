@@ -8,7 +8,7 @@
 #' @examples
 #' read_nirs_example()
 #' read_nirs_example("opticaldensity_raw.txt")
-read_nirs_example <- function(path = NULL){
+nirsex_example <- function(path = NULL){
   if(is.null(path)){
     dir(fs::path_package("extdata", package = "nirsex"))
   } else {
@@ -29,16 +29,19 @@ read_nirs_example <- function(path = NULL){
 extract_ext <- function(file){
   exttypes = c('csv','xlsx','txt')
 
-  stringr::str_sub(
-    stringr::str_extract(
+    ext = stringr::str_extract(
       file,
       stringr::str_c(
         "(?<=\\.)", exttypes,"$", collapse = "|"
       )
-    ),
-    start = 2,
-    end = -1
-  )
+    )
+
+    if(is.na(ext)){
+      rlang::abort("error_filetype",
+                   message = "File Type {ext} not currently supported. Please input files as .txt, .csv, or .xlsx")
+    }
+
+    ext
 }
 
 

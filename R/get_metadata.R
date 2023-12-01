@@ -24,14 +24,21 @@ get_metadata <- function(s, type){
 
     # find index for the start of the legend in the list s
     # throw error if it can't be found
-    legendstart = stringr::str_which(s, "Trace")
+    legendstart = stringr::str_which(s, "Legend")
     if(length(legendstart) <1){
       error_file_metadata("legend")
     }
 
+
+    if(length(stringr::str_which(s, "Trace")) > 0){
+      legendtype = "haemoglobin"
+    } else {
+      legendtype = "optical_density"
+    }
+
     # find index for the end of the legend in the list s
     # throw error if it can't be found
-    legendend = stringr::str_which(s[legendstart:length(s)], "Event")
+    legendend = stringr::str_which(s[(legendstart + 3):length(s)], "Event")
     if(length(legendend) < 1){
       error_file_metadata("legend")
     }
@@ -39,18 +46,24 @@ get_metadata <- function(s, type){
     # get the legend entries from the list
     # start at legendstart + 1 because the Trace is not a legend item
     # end at legendstart + legendend - 1
-    p = s[(legendstart + 1):(legendstart + legendend - 1)]
+    p = s[(legendstart + 3):(legendstart + legendend)]
+
 
     # put into a 2 column data frame
     # column `X1` has column numbers
     # column `X2` has names of columns supplied by Oxysoft
-    data.frame(
-      matrix(
-        p[!is.na(p)],
-        ncol = 2,
-        byrow = T
-      )
-    )
+    legend = list("export_type"= legendtype,
+                  "cols" = data.frame(
+                    matrix(
+                      p[!is.na(p)],
+                      ncol = 2,
+                      byrow = T
+                    )
+                  ))
+
+
+  } else if(type == "wavelengths"){
+    #\\TODO
   } else {
     # data frame with metadata types and their respective
     # regular expressions to look for in 's' and how many
@@ -58,11 +71,15 @@ get_metadata <- function(s, type){
     mtdt = data.frame(
       types = c("num_samples",
                 "hz",
-                "optode_template"),
+                "optode_template",
+                "meas_date",
+                "serial"),
       txt = c("(Export|Selected) time span \\(sample numbers\\):?",
               "Export sample rate",
-              "Optode-template"),
-      addi = c(2,1,1)
+              "Optode-template",
+              "Start of measurement",
+              "Device id"),
+      addi = c(2,1,1,1,1)
     )
 
     # check the type of metadata supplied actually is a supported type
@@ -117,11 +134,12 @@ get_id_from_filename <- function(file){
 #' @return shorter character string
 #' @export
 get_labels <- function(longname){
+
   if(stringr::str_detect(
     longname,
     "(S|s)ample (N|n)umber")
   ){
-    "sampleNumber"
+     "samp_num"
   } else if(stringr::str_detect(
     longname,
     "TSI Fit Factor"
@@ -140,3 +158,37 @@ get_labels <- function(longname){
     )
   }
 }
+
+#' Get channel types from column names
+#'
+#' @param longname
+#'
+#' @return ch_type
+#' @export
+get_ch_type <- function(longname){
+  if(stringr::str_detect(
+    longname,
+    "(S|s)ample (N|n)umber")
+  ){
+    "samp_num"
+  } else if(stringr::str_detect(
+    longname,
+    "O2Hb"
+  )){
+    "hbo"
+  } else if(stringr::str_detect(
+    longname,
+    "HHb"
+  )) {
+    "hbr"
+  } else if(stringr::str_detect(
+    longname,
+    "TSI"
+  )) {
+    "tsi"
+  } else {
+    "misc"
+  }
+}
+
+

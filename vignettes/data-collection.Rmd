@@ -1,0 +1,70 @@
+---
+title: "data-collection"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{data-collection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(nirsex)
+```
+
+This study uses the Portamon manufactured by [Artinis Medical Systems](https://www.artinis.com/). Artinis provides software, called Oxysoft, to use with the Portamon to collect data.
+
+To install Oxysoft, the destination computer must have the software key plugged in to a USB-C portal. It must have an Oxysoft USB drive plugged in. The Oxysoft USB drive contains the installer, uninstaller, configuration files, the manual for the Portamon and for Oxysoft, and more. If the information you need to know cannot be found in the files on the Oxysoft USB, you can reach out to an Artinis product contact. As of 2023, our contact is Bauke Wiersma <Bauke@artinis.com>, or you can go to the Artinis website and request help.
+
+Sara Biddle's Prisma Health PC has been approved to have Oxysoft installed. No other Prisma Health computer is approved. We have two Portamon devices, each came with a laptop that has Oxysoft installed. These laptops are not Prisma Health laptops, so they can only use Prisma Health Guest wifi to connect to the internet. You shouldn't need to connect to the internet to use Oxysoft.
+
+To use Oxysoft for data collection, the software key must still be plugged in and the Bluetooth dongle must also be plugged in.
+
+1. Open Oxysoft.
+2. Close any open graphs in the main panel. 
+  - Select `Graphs` in the top bar.
+  - Select `Close all graphs`. 
+  There should be no open graphs in the main panel.
+3. Start a measurement.
+  - Select `Measurement` in the top bar.
+  - Select `Create Measurement and Start Device (Wizard)...` from drop down.
+  - Name the measurement appropriately. 
+  - Select the `Copy settings from:` drop down. 
+  - Scroll to the top of the drop down and select `no copy`. 
+  - Click `Next`. Pop up will open to add a bluetooth device.
+  - Click `Add`. Pop up will open to select type of device.
+  - Select `OxyMon/PortaMon/PortaLite/OctaMon`, which should be auto filled.
+  - Click `OK`. 
+  - Select correct device number, this should match the number on the top of the Portamon.
+  - Click `Connect`.
+  - Device should pair with the computer. If it does not, try the following steps:
+      - Check the device is on. The green LED light should be on. If not, turn on by holding down the button on the left until the lights come on (about three seconds).
+      - Hold the bluetooth button down for about three seconds while you click `connect` on the computer.
+      - Unpair the device with the computer in the computer's bluetooth settings, then re-pair.
+      - Restart the computer.
+      - Try using the other Portamon.
+  - When successfully connected, a blue LED will turn on on the Portamon and the device type and number will be listen in the `Combined Devices` pop up. 
+  - Click `OK`.
+  - The Optode-template window will now be open. 
+  - Under `Optode-template: (Filtered by PortaMon)` click the drop down.
+  - Select `Portamon TSI Fit Factor`.
+  - Under `k (1/mm)` click the drop down.
+  - Select `1.63 (calf)`.
+  - Under `h (1/mm)` click the drop down.
+  - Select `5.5e-4 (calf)`.
+  - Click `Next`.
+  - The Light Source to Optode Mapping window will now be open. Leave all settings as is and click `Next`.
+  - The Device settings window will now be open. Leave all settings as is and click `Next`.
+  - The Further Options window will now be open. The `Action` drop down should have `Start measurement after finishing wizard` selected.
+  - Click `Finish`.
+  - The Create All Graphs window will pop up. Leave settings as is and click `OK`. 
+  - There will be an Oxysoft pop up. It says 'The program will enable the light sources now. Are you sure you want to start the device(s)?' When you are ready to begin data collection, click `Yes`. 
+  - Graphs will initialize and data collection will begin.
+  - At the end of data collection, click the little red pill in the top bar to end data collection. Data collection complete. 
+

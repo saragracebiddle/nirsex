@@ -1,8 +1,8 @@
-test_that("read_nirs_examples returns character vector of files in
+test_that("nirsex_examples() returns character vector of files in
           ~/inst/extdata/", {
-  expect_type(read_nirs_example(), "character")
+  expect_type(nirsex_example(), "character")
 
-  expect_type(read_nirs_example("opticaldensity_raw.txt"), "character")
+  expect_type(nirsex_example("nirs_example.txt"), "character")
 
-  expect_error(read_nirs_example("idonotexist.txt"))
+  expect_error(nirsex_example("idonotexist.txt"))
 })

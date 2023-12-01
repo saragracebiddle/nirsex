@@ -8,9 +8,11 @@ read_nirs(file, ...)
 }
 \arguments{
 \item{file}{file to read}
+
+\item{...}{other parameters to pass to class methods}
 }
 \value{
-data.frame
+rawdata
 }
 \description{
 Reads a file of NIRS data and creates a data frame from it.

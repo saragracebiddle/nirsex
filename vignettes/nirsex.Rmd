@@ -17,3 +17,55 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(nirsex)
 ```
+
+Read in NIRS data file.
+
+```{r}
+data <- read_nirs()
+
+startMin <- 0
+startSec <- 0
+starttime <- (startmin*60)+startsec
+```
+
+
+Create a `protocol` object that matches the exercise test conditions. 
+
+```{r}
+states = c("Rest" = 120,
+           "Warm Up" = 120,
+           "Moderate Intensity" = 120)
+
+order = c(1,2,3,1,3,1,3,1)
+
+protocol <- create_protocol(states, order)
+```
+
+
+
+```{r}
+averagedsignals <- avg_signals(data, timecol = "Time", starttime)
+```
+
+```{r}
+plot_averageddata(dt = averagedsignals, cols= cols)
+```
+
+```{r}
+params = list(
+  protocol = protocol,
+  timecol = timecol,
+  variables = cols,
+  fit_bl_length = 30
+)
+```
+
+```{r}
+timealigned = time_align(averagedsignals, params)
+```
+
+
+```{r}
+
+```
+
